@@ -12,7 +12,7 @@ import uvicorn
 import json
 import numpy as np
 
-# Import functions/classes from template files
+# Import functions/classes from your template files
 from graph import Graph
 from node import Node
 from dijkstra import dijkstra
@@ -39,17 +39,19 @@ async def create_upload_file(file: UploadFile = File(...)):
 
     # 1. Check for valid file type
     if not file.filename.endswith('.json'):
-        raise HTTPException(status_code=400, detail="Upload Error. Invalid file type. Please upload a .json file.")
+        raise HTTPException(status_code=400, detail="Invalid file type. Please upload a .json file.")
 
     try:
         # 2. Read the file content asynchronously
         content = await file.read()
-        data = json.loads(content)
 
-        # 3. Create a new graph object (based on logic from your utils.py)
+        # 3. Decode bytes to string (THE FIX IS HERE)
+        data = json.loads(content.decode('utf-8'))
+
+        # 4. Create a new graph object (based on logic from your utils.py)
         graph = Graph()
 
-        # 4. Populate the graph
+        # 5. Populate the graph
         for row in data:
             source_id = str(row["source"])
             target_id = str(row["target"])
@@ -65,7 +67,7 @@ async def create_upload_file(file: UploadFile = File(...)):
             # Add the edge
             graph.add_edge(graph.nodes[source_id], graph.nodes[target_id], weight, bidirectional)
 
-        # 5. Set the new graph as the active one
+        # 6. Set the new graph as the active one
         active_graph = graph
 
         return {"Upload Success": file.filename}
@@ -89,7 +91,7 @@ async def get_shortest_path(start_node_id: str, end_node_id: str):
 
     # 1. Check if a graph is loaded
     if active_graph is None:
-        raise HTTPException(status_code=400, detail="Solver Error. No active graph. Please upload a graph first.")
+        raise HTTPException(status_code=400, detail="No active graph. Please upload a graph first.")
 
     # 2. Check if nodes exist in the graph
     if start_node_id not in active_graph.nodes:
@@ -103,7 +105,6 @@ async def get_shortest_path(start_node_id: str, end_node_id: str):
 
     try:
         # 4. Run Dijkstra's algorithm.
-        # Your dijkstra.py function modifies the graph in-place.
         dijkstra(active_graph, start_node)
 
         # 5. Get the total distance from the end node's 'dist' attribute
