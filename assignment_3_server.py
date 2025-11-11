@@ -45,10 +45,10 @@ async def create_upload_file(file: UploadFile = File(...)):
         # 2. Read the file content asynchronously
         content = await file.read()
 
-        # 3. Decode bytes to string (THE FIX IS HERE)
+        # 3. Decode bytes to string
         data = json.loads(content.decode('utf-8'))
 
-        # 4. Create a new graph object (based on logic from your utils.py)
+        # 4. Create a new graph object
         graph = Graph()
 
         # 5. Populate the graph
@@ -139,6 +139,8 @@ async def get_shortest_path(start_node_id: str, end_node_id: str):
 
 if __name__ == "__main__":
     print("Server is running at http://localhost:8080")
-    # Note: The 'reload=True' is great for development but should be
-    # removed or set to False for production/deployment.
-    uvicorn.run("server:app", host="0.0.0.0", port=8080, reload=True)
+
+    # ------------------ THE FIX IS HERE ------------------
+    # Use your actual file name ("assignment_3_server") instead of "server"
+    uvicorn.run("assignment_3_server:app", host="0.0.0.0", port=8080, reload=True)
+    # -----------------------------------------------------
